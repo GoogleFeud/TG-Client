@@ -1,0 +1,35 @@
+{
+  "name": "TG-Client",
+  "version": "1.0.0",
+  "description": "TG Client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoogleFeud/TG-Client.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GoogleFeud/TG-Client/issues"
+  },
+  "homepage": "https://github.com/GoogleFeud/TG-Client#readme",
+  "devDependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/runtime": "^7.9.6",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "core-js": "^3.6.5",
+    "react": "^16.13.1",
+    "react-bootstrap": "^1.0.1",
+    "react-dom": "^16.13.1",
+    "regenerator-runtime": "^0.13.5",
+    "terser": "^4.6.13"
+  }
+}
