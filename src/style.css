@@ -44,14 +44,41 @@ body {
      margin-left: 5px;
 }
 
+.play-messageBox::-webkit-scrollbar {
+    display: none;
+  }
+  
+
 .play-playerList {
     border-width: 3px;
     border-color: black;
     border-style: solid;
     width: 30%;
+    height: 45%;
     max-height: 400px;
     max-width: 400px;
     position: fixed;
     bottom: 5px;
     right: 5px;
+    overflow-y: scroll;
+}
+
+.play-playerList::-webkit-scrollbar {
+    display: none;
+  }
+  
+
+.play-playerInPlayerList {
+    width: 100%;
+    padding-left: 10px;
+    padding-top: 3px;
+    height: 35px;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-bottom-color: black;
+}
+
+.play-playerInPlayerList:last-of-type {
+    width: 100%;
+    border: none;
 }
