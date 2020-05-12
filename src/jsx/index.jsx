@@ -1,8 +1,15 @@
 
 import "regenerator-runtime"; // In order to use async/await
 import Home from "./Pages/Home";
+import Play from "./Pages/Play";
+import CustomWebSocket from "./Other/WebSocket";
 
 let _ROOT;
+
+const NAV = {
+    "/": Home,
+    "/play": Play
+}
 
 class App extends React.Component {
     constructor(props) {
@@ -11,10 +18,10 @@ class App extends React.Component {
         this.state = {
             url: url.path
         }
-        this.player = {connected: false};
-
-        window.history.pushState({url: url.path}, null, url.path)
-
+        this.player = null;
+        if (url.path === "/play" && sessionStorage.getItem("_room_" ) && sessionStorage.getItem("_sid_")) this.player = new CustomWebSocket("a", sessionStorage.getItem("_room_"));
+        else this.state.url = "/";
+        window.history.pushState({url: this.state.url}, null, this.state.url)
         window.onpopstate = e => {
         if (e.state) return this.setState({
          path: e.state.url
@@ -23,11 +30,10 @@ class App extends React.Component {
     }
 
     render() {
-        let Nav = Home;
-       // if (this.state.url === "/") Nav = Home;
+        let Nav = NAV[this.state.url] || Home;
         return(
             <div>
-                <Nav></Nav>
+                <Nav app={this}></Nav>
             </div>
         )
     }
@@ -40,6 +46,28 @@ class App extends React.Component {
             formed: url.toString()
         }
     }
+
+    goto(url) {
+     if (!NAV[url]) url = this.resolveURL(url);
+     let path = url.path || url;
+     window.history.pushState({
+      url: url.formed || url
+    }, null, url.formed || url);
+    this.setState({url: path});
+    return null;
+    }
+
+    joinGame(name, lobbyId) {
+        this.player = new CustomWebSocket(name, lobbyId);
+        this.goto("/play");
+    }
+
+    async getRequest(endpoint) {
+        const res = await fetch(`/api/${endpoint}`);
+        if (!res.ok) return false;
+        return await res.json();
+    }
+
 }
 
 window.onload = async () => {

@@ -1,4 +1,6 @@
 
+const forbiddenChars = ["!", ">", "<", "^", "?", "-", "=", "|", "\\", "/", "@", "%", "&", "*", "(", ")", "+", ":", ";", "~", "{", "}", "[", "]"];
+
 export default function Home(props) {
     const error = React.useRef();
     let name = "";
@@ -16,9 +18,15 @@ export default function Home(props) {
 
              <p ref={error} className="home-error"></p>
 
-             <button onClick={async () => {
+             <button onClick={async (e) => {
+                 e.persist();
                  if (name.length <= 3) return error.current.innerHTML = "Your username must be longer than 3 characters!";
-                 else error.current.innerHTML = "";
+                 if (forbiddenChars.some((c) => name.includes(c))) return error.current.innerHTML = `Your name contains invalid characters! (${forbiddenChars.join(", ")})`
+                 const playerNames = await props.app.getRequest(`playersIn?roomId=1111`);
+                 if (playerNames.some(p => p.toLowerCase() === name.toLowerCase())) return error.current.innerHTML = "This username is taken!";
+                 props.app.joinGame(name, "1111");
+                 e.target.disabled = true;
+                 error.current.innerHTML = "Please wait...";
              }}>JOIN!</button>
          </div>
         </div>
