@@ -21,7 +21,8 @@ export default class ChatBox extends React.Component {
                         if (e.target.value === "" || e.target.value === " ") return;
                         e.persist();
                         if (e.keyCode === 13) {
-                            if (await Commands(e.target.value, this.props.app) === true) {
+                            if (Commands.cmds.some(c => e.target.value.startsWith(c))) {
+                                Commands.run( e.target.value, this.props.app);
                                 e.target.value = "";
                                 return;
                             }

@@ -8,15 +8,34 @@ export default class PlayerList extends React.Component {
         this.state = {
             players: []
         }
- 
+
+        props.app.hasPlayer = (username) => {
+            return this.state.players.some(p => p.name === username);
+        }
+
+        props.app.getPlayerByIndexOrName = (thing) => {
+            return this.state.players.find((p, index) => p.name === thing || (index + 1) == thing);
+        }
+
+        props.app.getPlayer = (username) => {
+            return this.state.players.find(p => p.name === username);
+        }
+
+        props.app.getPlayerById = (id) => {
+            return this.state.players.find(p => p.id === id);
+        }
+        
         props.app.player.on("lobbyInfo", (data) => {
          props.app.player.name = data.yourName;
          this.setState({players: data.players});
+         props.app.setRolelist(data.rl);
       });
 
        props.app.player.on("playerTempDisconnect", (data) => {
-            this.state.players.find(p => p.name === data.player).disconnected = true;
-            this.forceUpdate();
+         const p = props.app.getPlayerById(data.id);
+         if (!p) return;
+         p.disconnected = true;
+        this.forceUpdate();
        });
 
        props.app.player.on("playerJoin", (data) => {
@@ -25,12 +44,15 @@ export default class PlayerList extends React.Component {
             this.state.players.push(data);
             return this.state.players;
         })
+        props.app.addRolelistSlot("Any");
        });
 
        props.app.player.on("playerLeave", (data) => {
-        props.app.addMessage({content: `${data.name} left the game!`, sender: "system"});
+        const p = props.app.getPlayerById(data.id);
+        if (!p) return;
+        props.app.addMessage({content: `${p.name} left the game!`, sender: "system"});
         this.setState(() => {
-            const leftIndex = this.state.players.findIndex(p => p.name === data.name);
+            const leftIndex = this.state.players.findIndex(p => p.id === data.id);
             this.state.players.splice(leftIndex, 1);
             this.state.players.forEach(v => {
                 if (v.number > (leftIndex + 1)) v.number--;
@@ -42,13 +64,17 @@ export default class PlayerList extends React.Component {
 
        
        props.app.player.on("playerReconnect", (data) => {
-        this.state.players.find(p => p.name === data.player).disconnected = false;
+        const p = props.app.getPlayerById(data.id);
+        if (!p) return;
+        p.disconnected = false;
         this.forceUpdate();
        });
 
        props.app.player.on("admin", (data) => {
-        console.log(data);
-        this.state.players.find(p => p.name === data.name).admin = true;
+        const p = props.app.getPlayerById(data.id);
+        console.log(data, p);
+        if (!p) return;
+        p.admin = true;
         this.forceUpdate();
        });
 

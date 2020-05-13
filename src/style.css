@@ -22,7 +22,7 @@ body {
 }
 
 .play-messageList {
-     height: 45%;
+     height: 40%;
      width: 50%;
      border-width: 3px;
      border-color: black;
@@ -81,4 +81,35 @@ body {
 .play-playerInPlayerList:last-of-type {
     width: 100%;
     border: none;
+}
+
+.play-graveyardBox {
+    border-width: 3px;
+    border-color: black;
+    border-style: solid;
+    width: 30%;
+    height: 400px;
+    max-width: 400px;
+    display: inline-block;
+}
+
+.play-rolelistBox {
+    border-width: 3px;
+    border-color: black;
+    border-style: solid;
+    width: 25%;
+    max-width: 250px;
+    max-height: 400px;
+    height: 400px;
+    display: inline-block;
+}
+
+@media only screen and (min-height: 300px) and (max-height: 800px) and (orientation:landscape) {
+     .play-graveyardBox {
+         height: 170px;
+     }
+
+     .play-rolelistBox {
+        height: 170px;
+     }
 }
