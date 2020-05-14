@@ -7,8 +7,10 @@ export default {
     if (cmd === "/admin") { // /admin <Password>
          if (!args.length) return true;
          const isPwd = await app.getRequest(`pwd?password=${args[0]}&player=${app.player.id}&lobbyId=${app.player.lobbyId}`);
-         if (isPwd.res) app.addMessage({content: "You are now an admin!", sender: "system"});
-         else app.addMessage({content: "Wrong password!", sender: "system"});
+         if (!isPwd.res) return app.addMessage({content: "Wrong password!", sender: "system"});
+         app.addMessage({content: "You are now an admin!", sender: "system"});
+         app.reloadRolelist();
+         app.addPlayerButtons(false);
          return true;
     }
     else if (cmd === "/kick") { // kick <username>
@@ -23,7 +25,6 @@ export default {
             return true;
         }
         const player = app.getPlayerByIndexOrName(args[0]);
-        console.log(player);
         const res = await app.getRequest(`kick?player=${player.id}&kicker=${app.player.id}&lobbyId=${app.player.lobbyId}`);
         if (!res.res) app.addMessage({content: "Something went wrong!", sender: "system"});
         else app.addMessage({content: "Player kicked!", sender: "system"});

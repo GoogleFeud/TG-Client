@@ -78,6 +78,10 @@ body {
     border-bottom-color: black;
 }
 
+.play-playerInPlayerList p {
+    display: inline-block;
+}
+
 .play-playerInPlayerList:last-of-type {
     width: 100%;
     border: none;
@@ -87,9 +91,12 @@ body {
     border-width: 3px;
     border-color: black;
     border-style: solid;
-    width: 30%;
+    width: 350px;
     height: 400px;
     max-width: 400px;
+    position: fixed;
+    top: 5px;
+    left: 0px;
     display: inline-block;
 }
 
@@ -101,10 +108,32 @@ body {
     max-width: 250px;
     max-height: 400px;
     height: 400px;
+    position: fixed;
+    top: 5px;
+    left: 360px;
     display: inline-block;
 }
 
+.play-rolelistSlot {
+    font-size: 14px;
+    width: 100%;
+    border: none;
+    padding-left: 5px;
+}
+
+.play-actionButton {
+    font-size: 12px;
+    border: none;
+    outline: none;
+    padding-left: 5px;
+}
+
 @media only screen and (min-height: 300px) and (max-height: 800px) and (orientation:landscape) {
+
+     .play-playerInPlayerList {
+         font-size: 12px;
+     }
+
      .play-graveyardBox {
          height: 170px;
      }
@@ -112,4 +141,18 @@ body {
      .play-rolelistBox {
         height: 170px;
      }
+}
+
+@media only screen and (min-width: 300px) and (max-width: 650px) {
+    .play-playerInPlayerList {
+        font-size: 12px;
+    }
+
+    .play-graveyardBox {
+        width: 200px;
+    }
+
+    .play-rolelistBox {
+       left: 210px;
+    }
 }

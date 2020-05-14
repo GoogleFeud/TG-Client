@@ -23,8 +23,10 @@ export default function Home(props) {
                  if (name.length <= 3) return error.current.innerHTML = "Your username must be longer than 3 characters!";
                  if (forbiddenChars.some((c) => name.includes(c))) return error.current.innerHTML = `Your name contains invalid characters! (${forbiddenChars.join(", ")})`
                  const playerNames = await props.app.getRequest(`playersIn?roomId=1111`);
+                 if (!error.current) return;
                  if (playerNames.some(p => p.toLowerCase() === name.toLowerCase())) return error.current.innerHTML = "This username is taken!";
                  props.app.joinGame(name, "1111");
+                 if (!error.current) return;
                  e.target.disabled = true;
                  error.current.innerHTML = "Please wait...";
              }}>JOIN!</button>

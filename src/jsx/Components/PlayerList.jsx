@@ -1,5 +1,15 @@
 
 import Player from "./Player";
+import Commands from "../Other/Commands";
+
+function _resolveButtons(app, thisPlayer, player) {
+    const btns = [];
+    if (thisPlayer.admin && !player.admin && player.id !== thisPlayer.id) btns.push({ // Kick button
+        text: "kick",
+        onClick: () => {console.log(player); Commands.run(`/kick ${player.name}`, app)},
+    });
+    return btns;
+} 
 
 export default class PlayerList extends React.Component {
     constructor(props) {
@@ -24,10 +34,25 @@ export default class PlayerList extends React.Component {
         props.app.getPlayerById = (id) => {
             return this.state.players.find(p => p.id === id);
         }
+
+        props.app.thisPlayer = () => {
+            return props.app.getPlayer(props.app.player.name);
+        }
+
+        props.app.addPlayerButtons = (update = true) => {
+            for (let player of this.state.players) {
+                player.buttons = _resolveButtons(props.app, props.app.thisPlayer(), player);
+            } 
+            if (update) this.forceUpdate();
+        }
         
         props.app.player.on("lobbyInfo", (data) => {
          props.app.player.name = data.yourName;
-         this.setState({players: data.players});
+         const players = [...data.players];
+         for (let player of players) {
+            player.buttons = _resolveButtons(props.app, players.find(p => p.name === data.yourName), player);
+        } 
+         this.setState({players: players});
          props.app.setRolelist(data.rl);
       });
 
@@ -40,6 +65,7 @@ export default class PlayerList extends React.Component {
 
        props.app.player.on("playerJoin", (data) => {
         props.app.addMessage({content: `${data.name} has joined the game!`, sender: "system"});
+        data.buttons = _resolveButtons(props.app, props.app.thisPlayer(), data);
         this.setState(() => {
             this.state.players.push(data);
             return this.state.players;
@@ -58,6 +84,7 @@ export default class PlayerList extends React.Component {
                 if (v.number > (leftIndex + 1)) v.number--;
             });
             if (this.state.players[0] && !this.state.players[0].host) this.state.players[0].host = true;
+            props.app.removeLastSlotFromRolelist();
             return this.state.players;
         })
        });
@@ -72,9 +99,9 @@ export default class PlayerList extends React.Component {
 
        props.app.player.on("admin", (data) => {
         const p = props.app.getPlayerById(data.id);
-        console.log(data, p);
         if (!p) return;
         p.admin = true;
+        p.buttons = _resolveButtons(props.app, props.app.thisPlayer(), data);
         this.forceUpdate();
        });
 
@@ -82,7 +109,7 @@ export default class PlayerList extends React.Component {
     }
  
     render() {
-        const pl = this.state.players.map((p, index) => <Player name={p.name} host={p.host} admin={p.admin} disconnected={p.disconnected} number={index + 1} key={index}></Player>)
+        const pl = this.state.players.map((p, index) => <Player buttons={p.buttons} name={p.name} host={p.host} admin={p.admin} disconnected={p.disconnected} number={index + 1} key={index}></Player>)
         return(
             <div className="play-playerList">
                 {pl}
