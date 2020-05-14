@@ -126,6 +126,20 @@ body {
     border: none;
     outline: none;
     padding-left: 5px;
+    margin-left: 5px;
+}
+
+.play-playerBadge {
+    font-size: 10px;
+    border: none;
+    outline: none;
+    padding: 3px 3px 3px 3px;
+    background-color: lightgray;
+    margin-left: 5px;
+    -webkit-user-select: none; /* Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
 }
 
 @media only screen and (min-height: 300px) and (max-height: 800px) and (orientation:landscape) {

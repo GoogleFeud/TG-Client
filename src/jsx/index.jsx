@@ -11,9 +11,10 @@ const NAV = {
     "/play": Play
 }
 
+
 class App extends React.Component {
     constructor(props) {
-        super();
+        super(props);
         const url = this.resolveURL();
         this.state = {
             url: url.path
@@ -67,6 +68,8 @@ class App extends React.Component {
         if (!res.ok) return false;
         return await res.json();
     }
+
+
 
 }
 

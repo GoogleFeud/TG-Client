@@ -4,12 +4,21 @@ import Commands from "../Other/Commands";
 
 export default class ChatBox extends React.Component {
     constructor(props) {
-        super();
+        super(props);
         this.messageList = React.createRef();
-        props.app.player.on("message", msg => {
+
+        props.app.addMessage = (msg) => {
+            this.addMessage(msg)
+        }
+
+    }
+
+    componentDidMount() {
+
+        this.props.app.player.on("message", msg => {
             this.addMessage(msg);
         });
-        props.app.addMessage = this.addMessage.bind(this);
+        
     }
 
     render() {
@@ -38,14 +47,15 @@ export default class ChatBox extends React.Component {
     //Msg object: {content: "", sender: "", receiver: "", whisper: Boolean}
     addMessage(message) {
         let msg = message.content;
+        console.log(message);
         if (message.sender === "system") msg = `<span style="font-weight: bold; color: red">${message.content}</span>`;
         else if (message.whisper) {
-            if (message.receiver == this.props.app.player.name) {
-                msg = `Whisper from <span style="font-weight: bold; color: green">${message.sender}</span>: ${message.content}`
-            }else if (message.sender == this.props.player.name) {
-                msg = `Whisper to <span style="font-weight: bold; color: green">${message.receiver}</span>: ${message.content}`
+            if (message.receiver === this.props.app.player.name) {
+                msg = `<span style="font-weight: bold; color: green">Whisper from ${message.sender}: ${message.content}</span>:`
+            }else if (message.sender === this.props.app.player.name) {
+                msg = `<span style="font-weight: bold; color: green">Whisper to ${message.receiver}:  ${message.content}</span>`
             }else {
-                msg = `<span style="font-weight: bold">${message.sender} is whispering to ${receiver}</span>`
+                msg = `<span style="font-weight: bold">${message.sender} is whispering to ${message.receiver}</span>`
             }
         }else msg = `<span style="font-weight: bold">${message.sender}</span>: ${message.content}`;
         const el = document.createElement("p");

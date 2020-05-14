@@ -22,6 +22,8 @@ export default function Home(props) {
                  e.persist();
                  if (name.length <= 3) return error.current.innerHTML = "Your username must be longer than 3 characters!";
                  if (forbiddenChars.some((c) => name.includes(c))) return error.current.innerHTML = `Your name contains invalid characters! (${forbiddenChars.join(", ")})`
+                 if (/\s/.test(name)) return error.current.innerHTML = "Currently, empty spaces are not allowed!";
+                 if (name.length > 14) return error.current.innerHTML = "Your name is too long!";
                  const playerNames = await props.app.getRequest(`playersIn?roomId=1111`);
                  if (!error.current) return;
                  if (playerNames.some(p => p.toLowerCase() === name.toLowerCase())) return error.current.innerHTML = "This username is taken!";
