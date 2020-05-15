@@ -1,4 +1,5 @@
 
+import Player from "./Player";
 
 class Slot extends React.Component {
         constructor(props) {
@@ -13,7 +14,7 @@ class Slot extends React.Component {
         render() {
         const curPlayer = this.props.thisPlayer();
         return(
-            <input className="play-rolelistSlot" type="text" disabled={(curPlayer) ? (curPlayer.host === true || curPlayer.admin === true) ? false:true:false} value={this.state.value} onChange={(e) => this.setState({
+            <input className="play-rolelistSlot" type="text" disabled={(curPlayer) ? (curPlayer.details.get(Player.ADMIN) === true || curPlayer.details.get(Player.HOST) === true) ? false:true:false} value={this.state.value} onChange={(e) => this.setState({
                 value: e.target.value
               })} onKeyUp={async (e) => {
                 if (e.keyCode === 13) {

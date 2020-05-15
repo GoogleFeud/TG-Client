@@ -4,14 +4,23 @@ import PlayerList from "./PlayerList";
 import Graveyard from "./GraveyardBox";
 import Rolelist from "./RolelistBox";
 import Commands from "../Other/Commands";
+import Bitfield from "../Other/Bitfield";
+import Player from "./Player";
 
 function _resolveButtons(app, thisPlayer, player, gameStarted = false) { // AND BADGES
     const btns = [];
     if (thisPlayer.id === player.id) btns.push({text: "YOU"})
-    if (thisPlayer.admin && !player.admin && player.id !== thisPlayer.id && !gameStarted) btns.push({ // Kick button
+    if (thisPlayer.details.get(Player.ADMIN) && !player.details.get(Player.ADMIN) && player.id !== thisPlayer.id && !gameStarted) btns.push({ // Kick button
         text: "kick",
-        onClick: () => {console.log(player); Commands.run(`/kick ${player.name}`, app)},
+        onClick: () => Commands.run(`/kick ${player.name}`, app)
     });
+    if ((thisPlayer.details.get(Player.ADMIN) || thisPlayer.details.get(Player.HOST)) && player.id == thisPlayer.id && !gameStarted) btns.push({
+        text: "start game",
+        onClick: async () => {
+            const success = await app.getRequest(`start?lobbyId=${app.player.lobbyId}&starter=${thisPlayer.id}`);
+            if (!success.res) return app.addMessage("Failed to start the game! The game must have at least 3 players.");
+        }
+    })
     return btns;
 } 
 
@@ -29,7 +38,7 @@ export default class PlayerManager extends React.Component {
                 const p = this.thisPlayer();
                 p.admin = true;
                 for (let pl of state.players) {
-                    pl.buttons = _resolveButtons(this.props.app, p, pl);
+                    pl.buttons = _resolveButtons(this.props.app, p, pl, this.props.app.started);
                 }
                 return state;
             });
@@ -40,12 +49,17 @@ export default class PlayerManager extends React.Component {
 
 
     componentDidMount() {
-
         this.props.app.player.on("lobbyInfo", (data) => {
             this.props.app.player.name = data.yourName;
+            const you = data.players.find(p => p.name === data.yourName);
+            you.details = new Bitfield(you.details);
+            try {
             for (let player of data.players) {
-               player.buttons = _resolveButtons(this.props.app, data.players.find(p => p.name === data.yourName), player);
+               if (player.id !== you.id) player.details = new Bitfield(player.details);
+               player.buttons = _resolveButtons(this.props.app, you, player, this.props.app.started);
+               console.log(player);
            } 
+        }catch(err) {console.log(err)};
             this.setState({players: data.players, rolelist: data.rl});
          });
 
@@ -62,7 +76,7 @@ export default class PlayerManager extends React.Component {
             this.setState((state) => {
                 const p = state.players.find(p => p.id === data.id);
                 if (!p) return {};
-                p.disconnected = true;
+                p.details.update(Player.DISCONNECTED);
                 return state;
             });
           });
@@ -78,7 +92,7 @@ export default class PlayerManager extends React.Component {
                 nPlayers.forEach(v => {
                  if (v.number > (leftIndex + 1)) v.number--;
                 });
-                if (nPlayers[0] && !nPlayers[0].host) nPlayers[0].host = true;
+                if (nPlayers[0] && !nPlayers[0].details.get(Player.HOST)) nPlayers[0].details.update(Player.HOST);
                 const rl = state.rolelist.concat();
                 rl.splice(rl.length - 1, 1);
                 return {
@@ -91,7 +105,8 @@ export default class PlayerManager extends React.Component {
         this.props.app.player.on("playerJoin", (data) => {
             this.setState(state => {
                 this.props.app.addMessage({content: `${data.name} has joined the game!`, sender: "system"});
-                data.buttons = _resolveButtons(this.props.app, this.thisPlayer(), data);
+                data.buttons = _resolveButtons(this.props.app, this.thisPlayer(), data, this.props.app.started);
+                data.details = new Bitfield(data.details);
                 const nP = state.players.concat();
                 nP.push(data);
                 const nR = state.rolelist.concat();
@@ -108,7 +123,7 @@ export default class PlayerManager extends React.Component {
             this.setState(state => {
                 const p = state.players.find(p => p.id === data.id);
                 if (!p) return;
-                p.disconnected = false;
+                p.details.clear(Player.DISCONNECTED);
                 return state;
             })
            });
@@ -117,11 +132,27 @@ export default class PlayerManager extends React.Component {
             this.setState(state => {
                 const p = state.players.find(p => p.id === data.id);
                 if (!p) return;
-                p.admin = true;
-                p.buttons = _resolveButtons(this.props.app, this.thisPlayer(), data);
+                p.details.update(Player.ADMIN);
+                p.buttons = _resolveButtons(this.props.app, this.thisPlayer(), data, this.props.app.started);
                 return state;
             });
            });
+
+        this.props.app.player.on("start", (data) => {
+            this.props.app.started = true;
+            this.props.app.addMessage({content: `The game has started! Your role is ${data.role}`, sender: "system"});
+            this.setState(state => {
+                const newP = state.players.concat();
+                for (let player of newP) {
+                    player.buttons = _resolveButtons(this.props.app, this.thisPlayer(), data, true);
+                }
+                return {players: newP};
+            });
+        });
+
+        this.props.app.player.on("win", (data) => {
+            this.props.app.addMessage({content: `${data.winners} win!`});
+        })
 
     }
 

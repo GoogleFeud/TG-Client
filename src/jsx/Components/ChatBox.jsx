@@ -40,6 +40,7 @@ export default class ChatBox extends React.Component {
                             e.target.value = "";
                         }
                     }}></input>
+                    
                 </div>
         )
     }

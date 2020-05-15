@@ -8,6 +8,7 @@ export default function Home(props) {
         <div className="container">
         <div className="row home-center">
         <div>
+            <img src="./logo.png"></img>
             <h1>The Testing Grounds</h1>
              <p>Welcome to the Testing Grounds, where role ideas are tested in simulated gameplay. If you have any questions regarding the Testing Grounds, please view the <a href="https://www.blankmediagames.com/phpbb/viewtopic.php?f=50&t=72338" target="_blank">FAQ</a>. You can also ask questions and report bugs in our <a href="https://discord.com/invite/EVS55Zb" target="_blank">discord server</a>. Created by <a href="https://blankmediagames.com/phpbb/memberlist.php?mode=viewprofile&un=GoogleFeud" target="_blank">GoogleFeud</a> </p> 
 

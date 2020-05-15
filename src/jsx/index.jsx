@@ -20,6 +20,7 @@ class App extends React.Component {
             url: url.path
         }
         this.player = null;
+        this.started = false;
         if (url.path === "/play" && sessionStorage.getItem("_room_" ) && sessionStorage.getItem("_sid_")) this.player = new CustomWebSocket("a", sessionStorage.getItem("_room_"));
         else this.state.url = "/";
         window.history.pushState({url: this.state.url}, null, this.state.url)

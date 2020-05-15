@@ -11,7 +11,7 @@ export default class Play extends React.Component {
             props.app.goto("/");
             location.reload();
         });
-    
+ 
     }
 
     render() {
