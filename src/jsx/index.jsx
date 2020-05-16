@@ -21,7 +21,7 @@ class App extends React.Component {
         }
         this.player = null;
         this.started = false;
-        if (url.path === "/play" && sessionStorage.getItem("_room_" ) && sessionStorage.getItem("_sid_")) this.player = new CustomWebSocket("a", sessionStorage.getItem("_room_"));
+        if (url.path === "/play" && sessionStorage.getItem("_room_" ) && sessionStorage.getItem("_sid_")) this.player = new CustomWebSocket("unnamed", sessionStorage.getItem("_room_"));
         else this.state.url = "/";
         window.history.pushState({url: this.state.url}, null, this.state.url)
         window.onpopstate = e => {
@@ -60,6 +60,12 @@ class App extends React.Component {
     }
 
     joinGame(name, lobbyId) {
+        this.player = new CustomWebSocket(name, lobbyId);
+        this.goto("/play");
+    }
+
+    reconnect(name, lobbyId, yourId) {
+        sessionStorage.setItem("_sid_", yourId);
         this.player = new CustomWebSocket(name, lobbyId);
         this.goto("/play");
     }

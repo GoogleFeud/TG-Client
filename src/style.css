@@ -21,6 +21,15 @@ body {
      font-size: 14px;
 }
 
+.home-reconnectMsg {
+    color : blue;
+}
+
+.home-reconnectMsg:hover {
+     cursor: pointer;
+     transform: scale(1.1);
+}
+
 .play-messageList {
      height: 40%;
      width: 50%;
@@ -46,7 +55,7 @@ body {
 
 .play-messageBox::-webkit-scrollbar {
     display: none;
-  }
+}
   
 
 .play-playerList {
@@ -98,7 +107,14 @@ body {
     top: 5px;
     left: 0px;
     display: inline-block;
+    overflow-y: scroll;
 }
+
+
+.play-graveyardBox::-webkit-scrollbar {
+    display: none;
+  }
+  
 
 .play-rolelistBox {
     border-width: 3px;
@@ -112,7 +128,14 @@ body {
     top: 5px;
     left: 360px;
     display: inline-block;
+    overflow-y: scroll;
 }
+
+
+.play-rolelistBox::-webkit-scrollbar {
+    display: none;
+  }
+  
 
 .play-rolelistSlot {
     font-size: 14px;

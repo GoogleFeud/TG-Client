@@ -7,7 +7,6 @@ class Player extends React.Component {
 
      render() {
         let color = "black";
-        console.log(this.props.details, this.props.details.get(Player.DISCONNECTED), this.props.details.get(Player.ADMIN), this.props.details.get(Player.HOST))
         if (this.props.details.get(Player.DISCONNECTED)) color = "gray";
         else if (this.props.details.get(Player.ADMIN)) color = "red";
         else if (this.props.details.get(Player.HOST)) color = "green";
