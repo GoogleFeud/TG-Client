@@ -21,7 +21,8 @@ function _resolveButtons(app, thisPlayer, player, gameStarted = false) { // AND 
             const success = await app.getRequest(`start?lobbyId=${app.player.lobbyId}&starter=${thisPlayer.id}`);
             if (!success.res) return app.addMessage({content: "An error occured while trying to start the game", sender: "system"});
         }
-    })
+    });
+    if (gameStarted && thisPlayer.role && thisPlayer.role.mafia && thisPlayer.role.mafia.some(pName => pName == player.name)) btns.push({text: "MAFIA"})
     return btns;
 } 
 
@@ -49,12 +50,15 @@ export default class PlayerManager extends React.Component {
 
 
     componentDidMount() {
+
         this.props.app.player.on("lobbyInfo", (data) => {
+            if (data.phase) this.props.app.started = true;
             this.props.app.player.name = data.yourName;
             const you = data.players.find(p => p.name === data.yourName);
             you.details = new Bitfield(you.details);
             try {
             for (let player of data.players) {
+               console.log(player);
                if (player.id !== you.id) player.details = new Bitfield(player.details);
                player.buttons = _resolveButtons(this.props.app, you, player, this.props.app.started);
            } 
@@ -139,7 +143,9 @@ export default class PlayerManager extends React.Component {
 
         this.props.app.player.on("start", (data) => {
             this.props.app.started = true;
-            this.props.app.addMessage({content: `The game has started! Your role is ${data.role}`, sender: "system"});
+            this.thisPlayer().role = data.role;
+            this.props.app.player.role = data.role;
+            this.props.app.addMessage({content: `The game has started! Your role is ${data.role.name}`, sender: "system"});
             this.setState(state => {
                 const newP = state.players.concat();
                 for (let player of newP) {

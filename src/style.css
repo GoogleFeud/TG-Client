@@ -165,6 +165,14 @@ body {
     user-select: none; /* Standard */
 }
 
+.play-time {
+    position: fixed;
+    top: 5px;
+    left: 620px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
 @media only screen and (min-height: 300px) and (max-height: 800px) and (orientation:landscape) {
 
      .play-playerInPlayerList {
@@ -178,6 +186,7 @@ body {
      .play-rolelistBox {
         height: 170px;
      }
+
 }
 
 @media only screen and (min-width: 300px) and (max-width: 650px) {
@@ -191,5 +200,9 @@ body {
 
     .play-rolelistBox {
        left: 210px;
+    }
+
+    .play-time {
+        left: 400px;
     }
 }
