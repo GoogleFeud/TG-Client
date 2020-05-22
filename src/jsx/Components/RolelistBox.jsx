@@ -18,6 +18,7 @@ class Slot extends React.Component {
                 value: e.target.value
               })} onKeyUp={async (e) => {
                 if (e.keyCode === 13) {
+                if (this.props.app.started) return;
                 const v = e.target.value.replace(/\s+/g,' ').trim();
                 if (v === "") return e.target.value = "Any";
                 e.persist();

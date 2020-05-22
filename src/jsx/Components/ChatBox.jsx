@@ -27,9 +27,10 @@ export default class ChatBox extends React.Component {
                     <div className="play-messageList" ref={this.messageList}>
                     </div>
                     <input type="text" className="play-messageBox" onKeyUp={(e) => {
-                        if (e.target.value === "" || e.target.value === " ") return;
-                        e.persist();
                         if (e.keyCode === 13) {
+                            if (e.target.value === "" || e.target.value === " ") return;
+                            if (this.props.app.started && this.props.app.phase === "Night" && this.props.app.player.role.mafia === null) return; // Ignore messages from non-mafia players
+                            e.persist();
                             if (Commands.cmds.some(c => e.target.value.startsWith(c))) {
                                 Commands.run( e.target.value, this.props.app);
                                 e.target.value = "";
@@ -48,7 +49,6 @@ export default class ChatBox extends React.Component {
     //Msg object: {content: "", sender: "", receiver: "", whisper: Boolean}
     addMessage(message) {
         let msg = message.content;
-        console.log(message);
         if (message.sender === "system") msg = `<span style="font-weight: bold; color: red">${message.content}</span>`;
         else if (message.whisper) {
             if (message.receiver === this.props.app.player.name) {

@@ -6,23 +6,44 @@ import Rolelist from "./RolelistBox";
 import Commands from "../Other/Commands";
 import Bitfield from "../Other/Bitfield";
 import Player from "./Player";
+import Player_Class from "../Other/Player";
 
 function _resolveButtons(app, thisPlayer, player, gameStarted = false) { // AND BADGES
     const btns = [];
-    if (thisPlayer.id === player.id) btns.push({text: "YOU"})
-    console.log(thisPlayer, player);
+    if (thisPlayer.id === player.id) btns.push({text: "YOU", type: "you"})
     if (thisPlayer.details.get(Player.ADMIN) && !player.details.get(Player.ADMIN) && player.id !== thisPlayer.id && !gameStarted) btns.push({ // Kick button
         text: "kick",
+        type: "kick",
         onClick: () => Commands.run(`/kick ${player.name}`, app)
     });
-    if ((thisPlayer.details.get(Player.ADMIN) || thisPlayer.details.get(Player.HOST)) && player.id == thisPlayer.id && !gameStarted) btns.push({
+    if ((thisPlayer.details.get(Player.ADMIN) || thisPlayer.details.get(Player.HOST)) && player.id === thisPlayer.id && !gameStarted) btns.push({
         text: "start game",
+        type: "s",
         onClick: async () => {
             const success = await app.getRequest(`start?lobbyId=${app.player.lobbyId}&starter=${thisPlayer.id}`);
             if (!success.res) return app.addMessage({content: "An error occured while trying to start the game", sender: "system"});
         }
     });
-    if (gameStarted && thisPlayer.role && thisPlayer.role.mafia && thisPlayer.role.mafia.some(pName => pName == player.name)) btns.push({text: "MAFIA"})
+    if (gameStarted && thisPlayer.role && thisPlayer.role.mafia && thisPlayer.role.mafia.some(pId =>pId == player.id)) btns.push({text: player.role.name.toUpperCase(), type: "maf"});
+    if (app.phase === "Night" && thisPlayer.role.details[0] > 0) {
+        if (thisPlayer.role.details[0] === 1) {
+            const tBtn = {text: "TARGET", onClick: (ev) => {
+                if (thisPlayer.action.target === player.id) {
+                    thisPlayer.action = {};
+                    ev.target.style.color = "black";
+                    app.player.send("cancelAction");
+                }else {
+                thisPlayer.action = {target: player.id};
+                app.player.send("setAction", {target: player.id});
+            }
+            }, type: "ac1"};
+            if (thisPlayer.role.details[3]) btns.push({text: "FA", onClick: () => {
+                    app.player.send("setAction", {target: player.id, fa: true});
+            }});
+            if (thisPlayer.role.details[1] && player.id === thisPlayer.id) btns.push(tBtn);
+            if (thisPlayer.role.details[2] && player.dead) btns.push(tBtn); 
+        }
+    }
     return btns;
 } 
 
@@ -40,7 +61,7 @@ export default class PlayerManager extends React.Component {
                 const p = this.thisPlayer();
                 p.details.update(Player.ADMIN);
                 for (let pl of state.players) {
-                    pl.buttons = _resolveButtons(this.props.app, p, pl, this.props.app.started);
+                    pl.addButtons(_resolveButtons(this.props.app, p, pl, this.props.app.started));
                 }
                 return state;
             });
@@ -54,16 +75,20 @@ export default class PlayerManager extends React.Component {
         this.props.app.player.on("lobbyInfo", (data) => {
             if (data.phase) this.props.app.started = true;
             this.props.app.player.name = data.yourName;
+            const players = [];
             const you = data.players.find(p => p.name === data.yourName);
+            this.props.app.player.role = you.role;
             you.details = new Bitfield(you.details);
             try {
             for (let player of data.players) {
-               console.log(player);
-               if (player.id !== you.id) player.details = new Bitfield(player.details);
-               player.buttons = _resolveButtons(this.props.app, you, player, this.props.app.started);
+                player = new Player_Class(player);
+                players.push(player);
+            }
+            for (let player of players) {
+                player.addButtons(_resolveButtons(this.props.app, you, player, this.props.app.started, this.state.players));
            } 
         }catch(err) {console.log(err)};
-            this.setState({players: data.players, rolelist: data.rl});
+            this.setState({players: players, rolelist: data.rl});
          });
 
          this.props.app.player.on("rolelistChange", (data) => {
@@ -108,10 +133,10 @@ export default class PlayerManager extends React.Component {
         this.props.app.player.on("playerJoin", (data) => {
             this.setState(state => {
                 this.props.app.addMessage({content: `${data.name} has joined the game!`, sender: "system"});
-                data.details = new Bitfield(data.details);
-                data.buttons = _resolveButtons(this.props.app, this.thisPlayer(), data, this.props.app.started);
+                const player = new Player_Class(data);
+                player.addButtons(_resolveButtons(this.props.app, this.thisPlayer(), data, this.props.app.started, state.players));
                 const nP = state.players.concat();
-                nP.push(data);
+                nP.push(player);
                 const nR = state.rolelist.concat();
                 nR.push("Any");
                 return {
@@ -136,7 +161,7 @@ export default class PlayerManager extends React.Component {
                 const p = state.players.find(p => p.id === data.id);
                 if (!p) return;
                 p.details.update(Player.ADMIN);
-                p.buttons = _resolveButtons(this.props.app, this.thisPlayer(), p, this.props.app.started);
+                p.addButtons(_resolveButtons(this.props.app, this.thisPlayer(), p, this.props.app.started, state.players));
                 return state;
             });
            });
@@ -149,7 +174,11 @@ export default class PlayerManager extends React.Component {
             this.setState(state => {
                 const newP = state.players.concat();
                 for (let player of newP) {
-                    player.buttons = _resolveButtons(this.props.app, this.thisPlayer(), player, true);
+                    player.update(data.players.find(p => p.id === player.id));
+                }
+                for (let player of newP) {
+                    console.log(player);
+                    player.addButtons(_resolveButtons(this.props.app, this.thisPlayer(), player, true, newP));
                 }
                 return {players: newP};
             });
@@ -160,7 +189,7 @@ export default class PlayerManager extends React.Component {
             this.setState(state => {
                 const newP = state.players.concat();
                 for (let player of newP) {
-                    player.buttons = _resolveButtons(this.props.app, this.thisPlayer(), player, false);
+                    player.addButtons(_resolveButtons(this.props.app, this.thisPlayer(), player, false, newP));
                 }
                 return {players: newP};
             });
